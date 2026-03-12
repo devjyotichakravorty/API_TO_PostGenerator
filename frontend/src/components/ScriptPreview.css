@@ -1,0 +1,88 @@
+.script-preview {
+  background: #2d2d2d;
+  color: #f8f8f2;
+  border-radius: 8px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.script-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #1e1e1e;
+  border-bottom: 1px solid #404040;
+}
+
+.script-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.btn-copy {
+  padding: 8px 16px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.btn-copy:hover {
+  background: #218838;
+}
+
+.script-code {
+  margin: 0;
+  padding: 16px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-x: auto;
+  max-height: 600px;
+  background: #2d2d2d;
+}
+
+.loading,
+.error,
+.empty {
+  padding: 40px;
+  text-align: center;
+  font-size: 16px;
+  color: #999;
+}
+
+.error {
+  color: #e74c3c;
+  background: #f8f9fa;
+}
+
+.empty {
+  background: #f8f9fa;
+  color: #999;
+}
+
+@media (max-width: 768px) {
+  .script-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .script-header h3 {
+    width: 100%;
+  }
+
+  .btn-copy {
+    width: 100%;
+  }
+
+  .script-code {
+    font-size: 12px;
+    max-height: 400px;
+  }
+}

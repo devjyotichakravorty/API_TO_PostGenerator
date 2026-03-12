@@ -1,0 +1,46 @@
+{
+  "name": "JSONPlaceholder API Example",
+  "description": "Example API request for getting a user from JSONPlaceholder API",
+  "method": "GET",
+  "baseUrl": "https://jsonplaceholder.typicode.com",
+  "path": "/users/1",
+  "headers": [
+    {
+      "name": "Content-Type",
+      "value": "application/json"
+    }
+  ],
+  "uriParameters": [],
+  "queryParameters": [],
+  "requestBody": null,
+  "expectedStatusCode": 200,
+  "expectedResponseFields": [
+    "id",
+    "name",
+    "username",
+    "email",
+    "address",
+    "phone",
+    "website",
+    "company"
+  ],
+  "responseTimeThreshold": 1000,
+  "validationRules": [
+    {
+      "field": "id",
+      "ruleType": "exact",
+      "expectedValue": "1",
+      "description": "User ID should be 1"
+    },
+    {
+      "field": "email",
+      "ruleType": "valid_email",
+      "description": "Email should be valid format"
+    },
+    {
+      "field": "name",
+      "ruleType": "valid_string",
+      "description": "Name should be a non-empty string"
+    }
+  ]
+}
