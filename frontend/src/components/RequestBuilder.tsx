@@ -8,23 +8,43 @@ interface RequestBuilderProps {
   loading?: boolean;
 }
 
+interface RequestBuilderProps {
+  onRequestChange?: (request: ApiRequest) => void;
+  onExecute?: (request: ApiRequest) => void;
+  loading?: boolean;
+  initialRequest?: ApiRequest;
+}
+
 export const RequestBuilder: React.FC<RequestBuilderProps> = ({
   onRequestChange,
   onExecute,
   loading = false,
+  initialRequest,
 }) => {
-  const [request, setRequest] = useState<ApiRequest>({
-    method: 'GET',
-    baseUrl: 'https://reqres.in/api',
-    path: '/users',
-    uriParameters: [],
-    queryParameters: [],
-    headers: [{ name: 'Content-Type', value: 'application/json' }],
-    authentication: { type: 'none' },
-    requestBody: {},
-  });
+  const [request, setRequest] = useState<ApiRequest>(
+    initialRequest || {
+      method: 'GET',
+      baseUrl: 'https://reqres.in/api',
+      path: '/users',
+      uriParameters: [],
+      queryParameters: [],
+      headers: [{ name: 'Content-Type', value: 'application/json' }],
+      authentication: { type: 'none' },
+      requestBody: {},
+    }
+  );
 
-  const [bodyJson, setBodyJson] = useState<string>('{}');
+  const [bodyJson, setBodyJson] = useState<string>(
+    initialRequest && initialRequest.requestBody ? JSON.stringify(initialRequest.requestBody, null, 2) : '{}'
+  );
+
+  // Update state if initialRequest changes (e.g., when switching builder step)
+  React.useEffect(() => {
+    if (initialRequest) {
+      setRequest(initialRequest);
+      setBodyJson(initialRequest.requestBody ? JSON.stringify(initialRequest.requestBody, null, 2) : '{}');
+    }
+  }, [initialRequest]);
 
   const handleMethodChange = (method: ApiRequest['method']) => {
     const updated = { ...request, method };
@@ -48,11 +68,15 @@ export const RequestBuilder: React.FC<RequestBuilderProps> = ({
     field: 'type' | 'token' | 'username' | 'password',
     value: string
   ) => {
-    const authentication: ApiRequest['authentication'] = {
+    let authentication: ApiRequest['authentication'] = {
       type: ((request.authentication?.type || 'none') as 'bearer' | 'basic' | 'oauth2' | 'none'),
       ...(request.authentication as Record<string, unknown>),
       [field]: value,
     };
+    // If switching to bearer, clear token if user id/password are entered
+    if (field === 'type' && value === 'bearer') {
+      authentication = { type: 'bearer', username: '', password: '', token: '' };
+    }
     const updated = { ...request, authentication };
     setRequest(updated);
     onRequestChange?.(updated);
@@ -163,15 +187,41 @@ export const RequestBuilder: React.FC<RequestBuilderProps> = ({
           </div>
 
           {request.authentication?.type === 'bearer' && (
-            <div className="form-group flex-1">
-              <label>Token</label>
-              <input
-                type="password"
-                placeholder="Enter bearer token"
-                value={request.authentication?.token || ''}
-                onChange={(e) => handleAuthChange('token', e.target.value)}
-              />
-            </div>
+            <>
+              {/* If token exists, show token and disable user/pass fields */}
+              {request.authentication?.token ? (
+                <div className="form-group flex-1">
+                  <label>Token (auto-fetched)</label>
+                  <input
+                    type="text"
+                    value={request.authentication?.token}
+                    readOnly
+                    style={{ background: '#f0f0f0' }}
+                  />
+                </div>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label>User ID (email)</label>
+                    <input
+                      type="text"
+                      placeholder="Enter user id/email"
+                      value={request.authentication?.username || ''}
+                      onChange={(e) => handleAuthChange('username', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Password</label>
+                    <input
+                      type="password"
+                      placeholder="Enter password"
+                      value={request.authentication?.password || ''}
+                      onChange={(e) => handleAuthChange('password', e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
+            </>
           )}
 
           {request.authentication?.type === 'basic' && (

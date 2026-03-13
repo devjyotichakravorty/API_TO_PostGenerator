@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosError } from 'axios';
 import { ApiRequest, ApiResponse, ApiExecutionResult } from '../models/types';
+import { tokenManager } from './TokenManager';
 
 export class ApiExecutor {
   /**
@@ -10,6 +11,28 @@ export class ApiExecutor {
       const startTime = Date.now();
       const url = this.buildUrl(apiRequest);
       const config = this.buildAxiosConfig(apiRequest);
+
+      // Auto Bearer Token logic
+      let envToken: string | undefined = undefined;
+      if (apiRequest.authentication?.type === 'bearer') {
+        // If token is provided, use it; else fetch using credentials
+        if (apiRequest.authentication.token) {
+          envToken = apiRequest.authentication.token;
+        } else if (apiRequest.authentication.username && apiRequest.authentication.password) {
+          envToken = await tokenManager.getToken(apiRequest.baseUrl, {
+            email: apiRequest.authentication.username,
+            password: apiRequest.authentication.password,
+          });
+        } else {
+          envToken = await tokenManager.getToken(apiRequest.baseUrl);
+        }
+        if (envToken) {
+          if (!config.headers) config.headers = {};
+          (config.headers as Record<string, string>)['Authorization'] = `Bearer ${envToken}`;
+          // Save token back to request for frontend display
+          apiRequest.authentication.token = envToken;
+        }
+      }
 
       const response = await axios({
         method: apiRequest.method.toLowerCase(),

@@ -265,6 +265,7 @@ export const AdvancedQAForm: React.FC = () => {
             onRequestChange={() => setError('')}
             onExecute={handleExecuteApi}
             loading={loading}
+            initialRequest={workflow.apiRequest}
           />
         )}
 
